@@ -23,9 +23,16 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
-// Group Route ADMIN
+// Group Route ADMINphp artisan storage:link
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function() { return "Halaman Admin Dashboard"; })->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    
+    // Manajemen Buku
+    Route::get('/books', [AdminController::class, 'books'])->name('books');
+    Route::get('/books/create', [AdminController::class, 'bookCreate'])->name('books.create');
+    Route::post('/books', [AdminController::class, 'bookStore'])->name('books.store');
+    
 });
 
 // Group Route STAFF (Pegawai)
