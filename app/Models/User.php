@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role', 'phone', 'address'
     ];
 
     /**
@@ -44,5 +45,18 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Relasi: User meminjam banyak buku
+    public function loans() {
+        return $this->hasMany(Loan::class);
+    }
+
+    // Cek apakah user punya denda tertunggak (Syarat Blokir Peminjaman)
+    public function hasUnpaidFines() {
+        return $this->loans()
+                    ->where('fine_amount', '>', 0)
+                    ->where('is_fine_paid', false)
+                    ->exists();
     }
 }
