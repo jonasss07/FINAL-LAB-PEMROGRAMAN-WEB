@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\StaffController;
 
 Route::get('/', function () {
     return view('welcome'); // Homepage umum
@@ -37,7 +38,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 // Group Route STAFF (Pegawai)
 Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
-    Route::get('/dashboard', function() { return "Halaman Staff Dashboard"; })->name('dashboard');
+    
+    // Dashboard (List Peminjaman)
+    Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
+    
+    // Action: Proses Pengembalian
+    // Kita gunakan POST/PUT karena ini mengubah data
+    Route::post('/loan/{loan}/return', [StaffController::class, 'returnBook'])->name('loan.return');
 });
 
 // Group Route STUDENT (Mahasiswa)
