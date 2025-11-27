@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\AdminController; 
-use App\Http\Controllers\StaffController; 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LoanController;
 use App\Http\Controllers\StudentController;
 
 Route::get('/', function () {
@@ -42,13 +42,13 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
 
 // Group Route STUDENT (Mahasiswa)
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
-    
-    // Dashboard sekarang menjadi Katalog
+    // Katalog
     Route::get('/dashboard', [StudentController::class, 'index'])->name('dashboard');
-    
-    // Halaman Detail Buku
-    // Menggunakan Model Binding (pastikan parameter {book} sesuai nama model)
     Route::get('/books/{book:slug}', [StudentController::class, 'show'])->name('books.show');
+    
+    // Transaksi Peminjaman
+    Route::post('/books/{book}/loan', [LoanController::class, 'store'])->name('books.loan'); // Proses Pinjam
+    Route::get('/my-loans', [LoanController::class, 'index'])->name('loans'); 
 });
 
 require __DIR__.'/auth.php';
