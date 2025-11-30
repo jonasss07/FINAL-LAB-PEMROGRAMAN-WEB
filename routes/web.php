@@ -1,13 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Models\Book;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\LoanController;
-use App\Http\Controllers\BookController; // Pastikan Controller ini di-import
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\UserController;   // Controller Baru
+use App\Http\Controllers\ReportController; // Controller Baru
 
 /*
 |--------------------------------------------------------------------------
@@ -15,13 +16,14 @@ use App\Http\Controllers\BookController; // Pastikan Controller ini di-import
 |--------------------------------------------------------------------------
 */
 
+// Halaman Depan (Landing Page)
 Route::get('/', function () {
-    // Ambil 4 buku terbaru untuk ditampilkan di landing page
-    $featuredBooks = Book::latest()->take(4)->get();
+    // Mengambil 4 buku terbaru untuk ditampilkan di welcome page
+    $featuredBooks = \App\Models\Book::latest()->take(4)->get();
     return view('welcome', compact('featuredBooks'));
 });
 
-// Redirect Dashboard sesuai Role
+// Redirect Dashboard Logic
 Route::get('/dashboard', function () {
     if (!Auth::check()) return redirect('/login');
     
@@ -35,29 +37,35 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // ==========================================
-// GROUP ROUTE ADMIN
+// 1. GROUP ROUTE ADMIN
 // ==========================================
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
-    ->name('admin.') // <--- PENTING: Ini yang membuat route menjadi 'admin.books.index'
+    ->name('admin.') // Prefix nama route jadi 'admin.'
     ->group(function () {
         
-        // Dashboard Admin
+        // Dashboard
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
         
-        // Manajemen Buku (Resource Controller)
-        // Otomatis membuat: admin.books.index, admin.books.create, admin.books.store, dll.
-        Route::resource('books', BookController::class); 
+        // Manajemen Buku (Resource: index, create, store, edit, update, destroy)
+        Route::resource('books', BookController::class);
+
+        // Manajemen User (Baru)
+        Route::resource('users', UserController::class);
+
+        // Laporan Analitik (Baru)
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports');
     });
 
 // ==========================================
-// GROUP ROUTE STAFF (PEGAWAI)
+// 2. GROUP ROUTE STAFF (PEGAWAI)
 // ==========================================
 Route::middleware(['auth', 'role:staff'])
     ->prefix('staff')
     ->name('staff.')
     ->group(function () {
         
+        // Dashboard & Pengembalian
         Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
         Route::post('/loan/{loan}/return', [StaffController::class, 'returnBook'])->name('loan.return');
         
@@ -67,18 +75,21 @@ Route::middleware(['auth', 'role:staff'])
     });
 
 // ==========================================
-// GROUP ROUTE STUDENT (MAHASISWA)
+// 3. GROUP ROUTE STUDENT (MAHASISWA)
 // ==========================================
 Route::middleware(['auth', 'role:student'])
     ->prefix('student')
     ->name('student.')
     ->group(function () {
         
+        // Katalog & Detail Buku
         Route::get('/dashboard', [StudentController::class, 'index'])->name('dashboard');
         Route::get('/books/{book:slug}', [StudentController::class, 'show'])->name('books.show');
+        
+        // Review Buku
         Route::post('/books/{book}/review', [StudentController::class, 'storeReview'])->name('books.review');
         
-        // Transaksi
+        // Transaksi Peminjaman
         Route::post('/books/{book}/loan', [LoanController::class, 'store'])->name('books.loan');
         Route::get('/my-loans', [LoanController::class, 'index'])->name('loans');
     });
