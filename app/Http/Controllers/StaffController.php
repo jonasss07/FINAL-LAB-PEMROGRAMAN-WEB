@@ -71,4 +71,33 @@ class StaffController extends Controller
             return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
     }
+
+    // 3. Halaman Daftar Denda (Yang belum lunas)
+    public function fines()
+    {
+        $unpaidFines = Loan::with(['user', 'book'])
+                           ->where('fine_amount', '>', 0)       // Ada nominal denda
+                           ->where('is_fine_paid', false)       // Belum lunas
+                           ->where('status', 'returned')        // Bukunya sudah dikembalikan
+                           ->latest('return_date')
+                           ->paginate(10);
+
+        return view('staff.fines', compact('unpaidFines'));
+    }
+
+    // 4. Proses Pelunasan Denda
+    public function markAsPaid(Loan $loan)
+    {
+        // Validasi ringan
+        if ($loan->fine_amount <= 0 || $loan->is_fine_paid) {
+            return back()->with('error', 'Data denda tidak valid atau sudah lunas.');
+        }
+
+        // Update status lunas
+        $loan->update([
+            'is_fine_paid' => true
+        ]);
+
+        return back()->with('success', 'Denda atas nama ' . $loan->user->name . ' berhasil dilunasi. Akun mahasiswa telah aktif kembali.');
+    }
 }

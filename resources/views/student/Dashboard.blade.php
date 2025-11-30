@@ -7,20 +7,20 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
+
             <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
                 <form method="GET" action="{{ route('student.dashboard') }}" class="flex flex-col md:flex-row gap-4">
-                    
+
                     <div class="flex-1">
-                        <input type="text" name="search" value="{{ request('search') }}" 
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" 
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             placeholder="Cari judul buku atau penulis...">
                     </div>
 
                     <div class="w-full md:w-48">
                         <select name="category" class="w-full border-gray-300 rounded-md shadow-sm">
                             <option value="">Semua Kategori</option>
-                            @foreach($categories as $cat)
+                            @foreach ($categories as $cat)
                                 <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>
                                     {{ $cat }}
                                 </option>
@@ -28,7 +28,8 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition">
+                    <button type="submit"
+                        class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition">
                         Cari
                     </button>
                 </form>
@@ -38,8 +39,9 @@
                 @forelse($books as $book)
                     <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition duration-300">
                         <div class="h-48 bg-gray-200 w-full object-cover">
-                            @if($book->cover_image)
-                                <img src="{{ asset('storage/' . $book->cover_image) }}" alt="{{ $book->title }}" class="w-full h-full object-cover">
+                            @if ($book->cover_image)
+                                <img src="{{ asset('storage/' . $book->cover_image) }}" alt="{{ $book->title }}"
+                                    class="w-full h-full object-cover">
                             @else
                                 <div class="flex items-center justify-center h-full text-gray-400">
                                     No Image
@@ -61,11 +63,18 @@
                                 <span class="text-sm {{ $book->stock > 0 ? 'text-green-600' : 'text-red-600' }}">
                                     {{ $book->stock > 0 ? 'Stok: ' . $book->stock : 'Stok Habis' }}
                                 </span>
-                                
-                                <a href="{{ route('student.books.show', $book->slug) }}" 
-                                   class="text-sm bg-gray-800 text-white px-3 py-1 rounded hover:bg-gray-700 transition">
+
+                                <a href="{{ route('student.books.show', $book->slug) }}"
+                                    class="text-sm bg-gray-800 text-white px-3 py-1 rounded hover:bg-gray-700 transition">
                                     Lihat Detail
                                 </a>
+                            </div>
+
+                            <div class="flex items-center mt-1 mb-2">
+                                <span class="text-yellow-400 text-sm mr-1">★</span>
+                                <span class="text-xs font-bold text-gray-600">
+                                    {{ number_format($book->average_rating, 1) }}
+                                </span>
                             </div>
                         </div>
                     </div>
